@@ -40,46 +40,93 @@ echo "export ARM_SUBSCRIPTION_ID='<your-subscription-id>'" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### **For Windows (PowerShell):**
-```powershell
-[System.Environment]::SetEnvironmentVariable('ARM_SUBSCRIPTION_ID', '<your-subscription-id>', 'User')
-```
-
 ## **2️⃣ Terraform Setup**
-### **2.1 Clone the Repository**
-If using a shared repository, clone it:
-```bash
-git clone https://github.com/your-org/terraform-azure-vnet.git
-cd terraform-azure-vnet
+
+### **2.1 Define Environment Variables in Terraform**
+To support both **dev** and **prod** environments, we will use Terraform variables.
+
+#### **Create a `variables.tf` file**
+```hcl
+variable "environment" {
+  description = "Deployment environment (dev or prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+}
+
+variable "location" {
+  description = "Azure region"
+  type        = string
+}
 ```
 
-### **2.2 Initialize Terraform**
+### **2.2 Create Environment-Specific Terraform Variable Files**
+Create a file for the development environment configuration.
+
+#### **`terraform.dev.tfvars` (Ignored in `.gitignore`)**
+```hcl
+environment = "dev"
+subscription_id = "your-dev-subscription-id"
+location = "South India"
+```
+
+For production, we will use environment variables instead of a `.tfvars` file.
+
+### **2.3 Initialize Terraform**
 Run the following command to initialize Terraform:
 ```bash
 terraform init
 ```
 
-### **2.3 Create the VNet and Subnets**
+### **2.4 Create the VNet and Subnets**
 Terraform will create the following resources:
 - **VNet:** `aks-cosmos-vnet` (CIDR: `10.0.0.0/16`)
 - **Subnets:**
   - `aks-subnet` (`10.0.1.0/24`) → Used for AKS nodes
-  - `cosmosdb-subnet` (`10.0.2.0/24`) → Used for Cosmos DB Private Endpoint
+  - `cosmosdb-subnet` (`10.0.2.0/24`) → Used for Cosmos DB Private Endpoint, now with **Service Endpoints enabled**
 
-#### **Apply Terraform Configuration:**
+### **2.5 Improving Security and Performance with Service Endpoints**
+To enhance security and performance, we will **enable Service Endpoints** for Cosmos DB within `cosmosdb-subnet`.
+
+#### **Terraform Update for Service Endpoints:**
+Modify the `cosmosdb-subnet` configuration to include:
+```hcl
+resource "azurerm_subnet" "cosmosdb_subnet" {
+  name                 = "cosmosdb-subnet"
+  resource_group_name  = azurerm_resource_group.huggingface.name
+  virtual_network_name = azurerm_virtual_network.aks_cosmos_vnet.name
+  address_prefixes     = ["10.0.2.0/24"]
+  service_endpoints    = ["Microsoft.AzureCosmosDB"]
+}
+```
+
+### **2.6 Apply Terraform Configuration**
+#### **For Development (using `.tfvars` file):**
 ```bash
-terraform apply -auto-approve
+terraform apply -var-file=terraform.dev.tfvars -auto-approve
+```
+#### **For Production (using environment variables):**
+```bash
+terraform apply -auto-approve \
+  -var="environment=prod" \
+  -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
+  -var="location=$TF_LOCATION"
 ```
 Once completed, Terraform will output the created resources.
 
 ## **3️⃣ Next Steps**
 Now that the **VNet and subnets** are created, proceed with:
 
-✅ **Creating a Private Endpoint for Cosmos DB** to restrict access.  
-✅ **Deploying AKS** inside `aks-subnet`.  
-✅ **Configuring Private DNS** for Cosmos DB resolution.  
+✅ **Creating a Private Endpoint for Cosmos DB** to restrict access.
+✅ **Deploying AKS** inside `aks-subnet`.
+✅ **Configuring Private DNS** for Cosmos DB resolution.
+✅ **Updating Cosmos DB Network Settings** to allow only traffic from the configured subnet.
 
 For further configurations, refer to the [Azure Terraform documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs).
 
 ---
-🚀 **Your Azure Virtual Network is now securely set up for AKS and Cosmos DB!**
+🚀 **Your Azure Virtual Network is now securely set up for AKS and Cosmos DB with dynamic environment configuration!**
