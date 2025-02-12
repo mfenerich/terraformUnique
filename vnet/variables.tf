@@ -14,14 +14,36 @@ variable "subscription_id" {
   type        = string
 }
 
+variable "allowed_regions" {
+  description = "List of allowed Azure regions"
+  type        = list(string)
+  default     = ["East US", "West US", "South India", "Central Europe"]
+}
+
 variable "location" {
-  description = "Azure region"
+  description = "Azure primary region"
   type        = string
   default     = "South India"
   
   validation {
-    condition     = contains(["East US", "West US", "South India", "Central Europe"], var.location)
-    error_message = "Location must be a valid Azure region."
+    condition     = contains(var.allowed_regions, var.location)
+    error_message = "Primary location must be a valid Azure region."
+  }
+}
+
+variable "secondary_location" {
+  description = "Azure secondary region"
+  type        = string
+  default     = "Central Europe"
+  
+  validation {
+    condition     = contains(var.allowed_regions, var.secondary_location)
+    error_message = "Secondary location must be a valid Azure region."
+  }
+
+  validation {
+    condition     = var.secondary_location != var.location
+    error_message = "Secondary location must be different from the primary location."
   }
 }
 
