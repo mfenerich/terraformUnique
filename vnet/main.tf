@@ -16,14 +16,14 @@ resource "azurerm_resource_group" "huggingface_dev" {
   count    = var.environment == "dev" ? 1 : 0
   name     = "huggingface-${var.environment}"
   location = var.location
-  tags     = var.tags
+  tags     = merge(var.tags, { environment = "dev" })
 }
 
 resource "azurerm_resource_group" "huggingface_prod" {
   count    = var.environment == "prod" ? 1 : 0
   name     = "huggingface-${var.environment}"
   location = var.location
-  tags     = var.tags
+  tags     = merge(var.tags, { environment = "prod" })
 
   lifecycle {
     prevent_destroy = true
@@ -35,7 +35,7 @@ resource "azurerm_virtual_network" "aks_cosmos_vnet" {
   location            = var.environment == "dev" ? azurerm_resource_group.huggingface_dev[0].location : azurerm_resource_group.huggingface_prod[0].location
   resource_group_name = var.environment == "dev" ? azurerm_resource_group.huggingface_dev[0].name : azurerm_resource_group.huggingface_prod[0].name
   address_space       = ["10.0.0.0/16"]
-  tags               = var.tags
+  tags               = merge(var.tags, { environment = var.environment })
 }
 
 resource "azurerm_subnet" "aks_subnet" {

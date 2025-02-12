@@ -20,8 +20,8 @@ variable "location" {
   default     = "South India"
   
   validation {
-    condition     = can(regex("^[A-Za-z ]+$", var.location))
-    error_message = "Location must be a valid Azure region name."
+    condition     = contains(["East US", "West US", "South India", "Central Europe"], var.location)
+    error_message = "Location must be a valid Azure region."
   }
 }
 
@@ -29,7 +29,6 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    environment = "dev"
     managed_by  = "terraform"
     project     = "huggingface"
   }
