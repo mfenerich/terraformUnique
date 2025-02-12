@@ -17,3 +17,14 @@ output "cosmosdb_subnet_id" {
   description = "The ID of the CosmosDB subnet"
   value       = azurerm_subnet.cosmosdb_subnet.id
 }
+
+output "cosmosdb_endpoint" {
+  description = "The endpoint of the Cosmos DB account"
+  value       = azurerm_cosmosdb_account.main.endpoint
+}
+
+output "cosmosdb_primary_key" {
+  description = "The primary key for the Cosmos DB account"
+  value       = azurerm_cosmosdb_account.main.primary_key
+  sensitive   = true
+}

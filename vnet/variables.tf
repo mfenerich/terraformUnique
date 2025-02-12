@@ -1,5 +1,5 @@
 variable "environment" {
-  description = "Deployment environment"
+  description = "Deployment environment (dev or prod)"
   type        = string
   default     = "dev"
   
@@ -29,7 +29,7 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    managed_by  = "terraform"
-    project     = "huggingface"
+    managed_by = "terraform"
+    project    = "huggingface"
   }
 }
