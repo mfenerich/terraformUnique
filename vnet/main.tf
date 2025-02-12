@@ -94,7 +94,7 @@ resource "azurerm_cosmosdb_account" "main" {
     name = "EnableMongo"
   }
 
-  mongo_server_version = "7.0"
+  mongo_server_version = "7.0" # TODO: Create a variable for the version
 
   // Add backup configuration only for production
   dynamic "backup" {
