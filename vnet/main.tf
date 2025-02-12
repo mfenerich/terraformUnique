@@ -172,6 +172,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix          = "huggingfaceaks"
   kubernetes_version  = var.kubernetes_version
 
+  # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020
+  lifecycle {
+    ignore_changes = [
+      default_node_pool[0],
+    ]
+  }
+
   default_node_pool {
     name                         = "system"
     vm_size                      = "Standard_DS2_v2"
