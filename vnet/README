@@ -27,19 +27,6 @@ To retrieve your subscription ID:
 az account show --query id --output tsv
 ```
 
-### **1.2 Set Subscription ID as an Environment Variable**
-Instead of hardcoding it in Terraform files, export the **Azure Subscription ID**:
-
-#### **For macOS/Linux:**
-```bash
-export ARM_SUBSCRIPTION_ID="<your-subscription-id>"
-```
-To make this persistent, add it to your `~/.bashrc` or `~/.zshrc`:
-```bash
-echo "export ARM_SUBSCRIPTION_ID='<your-subscription-id>'" >> ~/.bashrc
-source ~/.bashrc
-```
-
 ## **2️⃣ Terraform Setup**
 
 ### **2.1 Define Environment Variables in Terraform**
