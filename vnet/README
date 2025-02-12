@@ -1,0 +1,85 @@
+# Azure Virtual Network (VNet) Setup for AKS and Cosmos DB
+
+## Overview
+This guide provides step-by-step instructions to set up an **Azure Virtual Network (VNet)** for an **AKS cluster** and a **Cosmos DB Private Endpoint** using Terraform. The configuration follows best practices, ensuring **security, maintainability, and team collaboration**.
+
+## **Prerequisites**
+Before proceeding, ensure you have the following installed:
+
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) (Latest version)
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (For authentication)
+- An active **Azure subscription**
+
+## **1️⃣ Authentication with Azure**
+To avoid hardcoding credentials, we will use **environment variables** for authentication.
+
+### **1.1 Login to Azure CLI**
+Run the following command to authenticate Terraform with Azure:
+```bash
+az login
+```
+If you have multiple subscriptions, set the correct one:
+```bash
+az account set --subscription "<your-subscription-id>"
+```
+To retrieve your subscription ID:
+```bash
+az account show --query id --output tsv
+```
+
+### **1.2 Set Subscription ID as an Environment Variable**
+Instead of hardcoding it in Terraform files, export the **Azure Subscription ID**:
+
+#### **For macOS/Linux:**
+```bash
+export ARM_SUBSCRIPTION_ID="<your-subscription-id>"
+```
+To make this persistent, add it to your `~/.bashrc` or `~/.zshrc`:
+```bash
+echo "export ARM_SUBSCRIPTION_ID='<your-subscription-id>'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### **For Windows (PowerShell):**
+```powershell
+[System.Environment]::SetEnvironmentVariable('ARM_SUBSCRIPTION_ID', '<your-subscription-id>', 'User')
+```
+
+## **2️⃣ Terraform Setup**
+### **2.1 Clone the Repository**
+If using a shared repository, clone it:
+```bash
+git clone https://github.com/your-org/terraform-azure-vnet.git
+cd terraform-azure-vnet
+```
+
+### **2.2 Initialize Terraform**
+Run the following command to initialize Terraform:
+```bash
+terraform init
+```
+
+### **2.3 Create the VNet and Subnets**
+Terraform will create the following resources:
+- **VNet:** `aks-cosmos-vnet` (CIDR: `10.0.0.0/16`)
+- **Subnets:**
+  - `aks-subnet` (`10.0.1.0/24`) → Used for AKS nodes
+  - `cosmosdb-subnet` (`10.0.2.0/24`) → Used for Cosmos DB Private Endpoint
+
+#### **Apply Terraform Configuration:**
+```bash
+terraform apply -auto-approve
+```
+Once completed, Terraform will output the created resources.
+
+## **3️⃣ Next Steps**
+Now that the **VNet and subnets** are created, proceed with:
+
+✅ **Creating a Private Endpoint for Cosmos DB** to restrict access.  
+✅ **Deploying AKS** inside `aks-subnet`.  
+✅ **Configuring Private DNS** for Cosmos DB resolution.  
+
+For further configurations, refer to the [Azure Terraform documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs).
+
+---
+🚀 **Your Azure Virtual Network is now securely set up for AKS and Cosmos DB!**
