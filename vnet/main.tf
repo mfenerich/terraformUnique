@@ -191,9 +191,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020
     upgrade_settings { max_surge = "10%" }
   }
-  lifecycle {
-    prevent_destroy = false
-  }
   identity {
     type = "SystemAssigned"
   }
