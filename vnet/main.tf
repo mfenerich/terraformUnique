@@ -189,7 +189,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     max_count = var.environment == "prod" ? 5 : 3
   }
 
-
   identity {
     type = "SystemAssigned"
   }
@@ -224,7 +223,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   tags = merge(var.tags, { environment = var.environment })
 }
-
 
 
 ##############################
