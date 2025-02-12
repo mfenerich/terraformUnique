@@ -160,3 +160,96 @@ resource "azurerm_private_endpoint" "cosmosdb_private_endpoint" {
     private_dns_zone_ids = [azurerm_private_dns_zone.cosmosdb_dns.id]
   }
 }
+
+##############################
+# AKS Cluster
+##############################
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "huggingface-aks-${var.environment}-${random_string.suffix.result}"
+  location            = azurerm_virtual_network.aks_cosmos_vnet.location
+  resource_group_name = azurerm_virtual_network.aks_cosmos_vnet.resource_group_name
+  dns_prefix          = "huggingfaceaks"
+  kubernetes_version  = var.kubernetes_version
+
+  default_node_pool {
+    name                         = "system"
+    vm_size                      = "Standard_DS2_v2"
+    vnet_subnet_id               = azurerm_subnet.aks_subnet.id
+    os_disk_size_gb              = 128
+    type                         = "VirtualMachineScaleSets"
+    orchestrator_version         = var.kubernetes_version
+    only_critical_addons_enabled = true
+
+    # Enable the cluster autoscaler using the correct attribute
+    auto_scaling_enabled = true
+
+    # Set the minimum and maximum node counts
+    min_count = var.environment == "prod" ? 3 : 1
+    max_count = var.environment == "prod" ? 5 : 3
+  }
+
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin     = "azure"
+    service_cidr       = "10.0.3.0/24"
+    dns_service_ip     = "10.0.3.10"
+    network_policy     = "calico"
+    load_balancer_sku  = "standard"
+  }
+
+  auto_scaler_profile {
+    scale_down_delay_after_add = "10m"
+    scale_down_unneeded        = "10m"
+    balance_similar_node_groups = true  # Optional: Keeps node pools balanced
+    expander                   = "random" # Optional: Controls how AKS scales
+  }
+
+  maintenance_window {
+    allowed {
+      day   = "Sunday"
+      hours = [0, 1, 2]
+    }
+  }
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
+  }
+
+  azure_policy_enabled = true
+
+  tags = merge(var.tags, { environment = var.environment })
+}
+
+
+
+##############################
+# Log Analytics Workspace
+##############################
+
+resource "azurerm_log_analytics_workspace" "aks" {
+  name                = "law-aks-${var.environment}-${random_string.suffix.result}"
+  location            = azurerm_virtual_network.aks_cosmos_vnet.location
+  resource_group_name = azurerm_virtual_network.aks_cosmos_vnet.resource_group_name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = merge(var.tags, { environment = var.environment })
+}
+
+# Enable container insights solution
+resource "azurerm_log_analytics_solution" "containers" {
+  solution_name         = "ContainerInsights"
+  location             = azurerm_log_analytics_workspace.aks.location
+  resource_group_name  = azurerm_log_analytics_workspace.aks.resource_group_name
+  workspace_resource_id = azurerm_log_analytics_workspace.aks.id
+  workspace_name       = azurerm_log_analytics_workspace.aks.name
+
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
+  }
+}

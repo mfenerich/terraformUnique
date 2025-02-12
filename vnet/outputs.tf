@@ -28,3 +28,8 @@ output "cosmosdb_primary_key" {
   value       = azurerm_cosmosdb_account.main.primary_key
   sensitive   = true
 }
+
+output "kube_config" {
+  value     = azurerm_kubernetes_cluster.aks.kube_config_raw
+  sensitive = true
+}
