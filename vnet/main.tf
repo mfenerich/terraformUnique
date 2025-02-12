@@ -172,13 +172,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix          = "huggingfaceaks"
   kubernetes_version  = var.kubernetes_version
 
-  # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020
-  lifecycle {
-    ignore_changes = [
-      default_node_pool[0],
-    ]
-  }
-
   default_node_pool {
     name                         = "system"
     vm_size                      = "Standard_DS2_v2"
@@ -194,8 +187,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
     # Set the minimum and maximum node counts
     min_count = var.environment == "prod" ? 3 : 1
     max_count = var.environment == "prod" ? 5 : 3
-  }
 
+    # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020
+    upgrade_settings { max_surge = "10%" }
+  }
+  lifecycle {
+    prevent_destroy = false
+  }
   identity {
     type = "SystemAssigned"
   }
