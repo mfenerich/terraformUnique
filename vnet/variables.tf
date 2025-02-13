@@ -1,16 +1,10 @@
-variable "environment" {
-  description = "Deployment environment (dev or prod)"
-  type        = string
-  default     = "dev"
-  
-  validation {
-    condition     = contains(["dev", "prod"], var.environment)
-    error_message = "Environment must be either 'dev' or 'prod'."
-  }
-}
-
 variable "subscription_id" {
   description = "Azure Subscription ID"
+  type        = string
+}
+
+variable "environment" {
+  description = "Deployment environment (dev or prod)"
   type        = string
 }
 
@@ -21,7 +15,7 @@ variable "allowed_regions" {
 }
 
 variable "location" {
-  description = "Azure primary region"
+  description = "Primary location"
   type        = string
   default     = "South India"
   
@@ -32,7 +26,7 @@ variable "location" {
 }
 
 variable "secondary_location" {
-  description = "Azure secondary region"
+  description = "Secondary location for Cosmos DB (only for prod)"
   type        = string
   default     = "Central Europe"
   
@@ -48,16 +42,19 @@ variable "secondary_location" {
 }
 
 variable "tags" {
-  description = "Tags to apply to all resources"
+  description = "Tags for resources"
   type        = map(string)
-  default = {
-    managed_by = "terraform"
-    project    = "huggingface"
-  }
+  default     = {}
 }
 
 variable "kubernetes_version" {
-  description = "The version of Kubernetes to use for the AKS cluster"
+  description = "Kubernetes version for AKS"
   type        = string
-  default     = "1.31"
+  default = "1.31"
+}
+
+variable "mongo_server_version" {
+  description = "Mongo server version for Cosmos DB"
+  type        = string
+  default     = "7.0"
 }
