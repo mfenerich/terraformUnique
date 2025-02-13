@@ -7,15 +7,15 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   default_node_pool {
     name                         = "system"
-    vm_size                      = "Standard_DS2_v2"
+    vm_size                      = "Standard_B2s"
     vnet_subnet_id               = var.aks_subnet_id
     os_disk_size_gb              = 128
     type                         = "VirtualMachineScaleSets"
     orchestrator_version         = var.kubernetes_version
     only_critical_addons_enabled = true
     auto_scaling_enabled         = true
-    min_count = var.environment == "prod" ? 3 : 2
-    max_count = var.environment == "prod" ? 5 : 3
+    min_count = var.environment == "prod" ? 3 : 1
+    max_count = var.environment == "prod" ? 5 : 1
     upgrade_settings {
       max_surge = "10%"
     }
@@ -59,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
-  vm_size               = "Standard_DS3_v2"
+  vm_size               = "Standard_D3_v2"
   os_disk_size_gb       = 128
   auto_scaling_enabled  = true
   min_count             = var.environment == "prod" ? 5 : 1

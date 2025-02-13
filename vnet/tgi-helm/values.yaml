@@ -3,26 +3,26 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-replicas: 1  # No autoscaling for local Kind testing
+replicas: 1
 
 service:
   type: ClusterIP
-  port: 80  # Change to match the example
+  port: 80
 
 resources:
   requests:
     cpu: "4"
-    memory: "16Gi"
+    memory: "10Gi"
   limits:
     cpu: "4"
-    memory: "16Gi"
+    memory: "14Gi"
 
 model:
   id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
 persistence:
   enabled: true
-  size: 10Gi
-  storageClass: azurefile-csi  # Updated to use Azure File Share
-  mountPath: "/data"  # Ensures the model is stored correctly
+  size: 20Gi
+  storageClass: azurefile-csi
+  mountPath: "/data"
 
