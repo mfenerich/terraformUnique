@@ -1,0 +1,6 @@
+apiVersion: v2
+name: text-generation-inference
+version: 0.0.1
+type: application
+description: Deploys Hugging Face Text Generation Inference (TGI)
+icon: https://huggingface.co/front/assets/huggingface_logo-noborder.svg

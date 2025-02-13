@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.8"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.12"
+    }
   }
 }
 
@@ -252,4 +256,114 @@ resource "azurerm_log_analytics_solution" "containers" {
     publisher = "Microsoft"
     product   = "OMSGallery/ContainerInsights"
   }
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
+  name                  = "userpool"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+  vm_size               = "Standard_DS3_v2"
+  os_disk_size_gb       = 128
+  auto_scaling_enabled = true
+  min_count             = 1
+  max_count             = var.environment == "prod" ? 5 : 1
+  vnet_subnet_id        = azurerm_subnet.aks_subnet.id
+  node_labels = {
+    "agentpool" = "userpool"
+  }
+}
+
+resource "azurerm_storage_account" "tgi_storage" {
+  name                     = "tgistorage${random_string.suffix.result}"
+  resource_group_name      = var.environment == "dev" ? azurerm_resource_group.huggingface_dev[0].name : azurerm_resource_group.huggingface_prod[0].name
+  location                 = var.environment == "dev" ? azurerm_resource_group.huggingface_dev[0].location : azurerm_resource_group.huggingface_prod[0].location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  tags = merge(var.tags, { environment = var.environment })
+}
+
+resource "azurerm_storage_share" "tgi_share" {
+  name                 = "modeldata"
+  storage_account_id = azurerm_storage_account.tgi_storage.id 
+  quota                = 50
+}
+
+resource "kubernetes_secret" "azure_file_secret" {
+  metadata {
+    name      = "azure-file-secret"
+    namespace = "default"
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.tgi_storage.name
+    azurestorageaccountkey  = azurerm_storage_account.tgi_storage.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = azurerm_kubernetes_cluster.aks.kube_config.0.host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.cluster_ca_certificate)
+  }
+}
+
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.aks.kube_config.0.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config.0.cluster_ca_certificate)
+}
+
+
+resource "helm_release" "tgi" {
+  name       = "tgi"
+  namespace  = "default"
+  chart      = "./tgi-helm"
+  version    = "3.1.0"
+
+  set {
+    name  = "image.repository"
+    value = "ghcr.io/huggingface/text-generation-inference"
+  }
+
+  set {
+    name  = "image.tag"
+    value = "3.1.0"
+  }
+
+  set {
+    name  = "service.type"
+    value = "LoadBalancer"
+  }
+
+  set {
+    name  = "resources.requests.cpu"
+    value = "2"
+  }
+
+  set {
+    name  = "resources.requests.memory"
+    value = "4Gi"
+  }
+
+  set {
+    name  = "resources.limits.cpu"
+    value = "4"
+  }
+
+  set {
+    name  = "resources.limits.memory"
+    value = "8Gi"
+  }
+
+  set {
+    name  = "model.id"
+    value = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }
