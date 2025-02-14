@@ -99,15 +99,17 @@ module "storage" {
 
 # 7. Azure Container Registry (ACR)
 module "acr" {
-  source              = "./modules/acr"
-  environment         = var.environment
-  resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
-  tags                = var.tags
-  suffix              = random_string.suffix.result
-  sku                 = var.acr_sku
-  admin_enabled       = var.acr_admin_enabled
+  source                        = "./modules/acr"
+  environment                   = var.environment
+  resource_group_name           = module.resource_group.name
+  location                      = module.resource_group.location
+  tags                          = var.tags
+  suffix                        = random_string.suffix.result
+  sku                           = var.acr_sku
+  admin_enabled                 = var.acr_admin_enabled
+  aks_kubelet_identity_object_id = module.aks.kubelet_identity_object_id
 }
+
 
 # # 7. Kubernetes Secret for Azure File (using Kubernetes provider)
 # provider "kubernetes" {

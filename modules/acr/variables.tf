@@ -25,3 +25,8 @@ variable "sku" {
 variable "admin_enabled" {
   type = string
 }
+
+variable "aks_kubelet_identity_object_id" {
+  description = "The Object ID of the AKS Managed Identity"
+  type        = string
+}

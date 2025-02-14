@@ -1,17 +1,20 @@
+release:
+  namespace: default
+
 image:
-  repository: ghcr.io/huggingface/text-generation-inference
-  tag: latest
-  pullPolicy: IfNotPresent
+  repository: devacrny47wp.azurecr.io/text-generation-inference
+  tag: 3.1.0
+  pullPolicy: Always
 
 replicas: 1
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 80
 
 resources:
   requests:
-    cpu: "4"
+    cpu: "2"
     memory: "10Gi"
   limits:
     cpu: "4"
@@ -26,3 +29,6 @@ persistence:
   storageClass: azurefile-csi
   mountPath: "/data"
 
+
+storageAccountName: ""
+storageAccountKey: ""

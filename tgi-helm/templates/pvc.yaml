@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: tgi-model-pvc
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.release.namespace }}
 spec:
   accessModes:
     - ReadWriteMany  # Azure File Share supports multiple readers

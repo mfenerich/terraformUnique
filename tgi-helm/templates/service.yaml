@@ -2,12 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tgi-service
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.release.namespace }}
 spec:
   selector:
     app: tgi
   ports:
     - name: http
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+  type: {{ .Values.service.type }}
