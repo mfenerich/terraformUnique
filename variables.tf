@@ -58,3 +58,15 @@ variable "mongo_server_version" {
   type        = string
   default     = "7.0"
 }
+
+variable "acr_sku" {
+  description = "SKU for Azure Container Registry (Basic, Standard, Premium)"
+  type        = string
+  default     = "Standard"
+}
+
+variable "acr_admin_enabled" {
+  description = "Enable admin credentials for ACR"
+  type        = bool
+  default     = false
+}
