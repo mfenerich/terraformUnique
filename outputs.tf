@@ -31,3 +31,11 @@ output "acr_admin_password" {
 output "acr_name" {
   value = module.acr.name
 }
+
+output "storage_account_name" {
+  value = module.storage.storage_account_name
+}
+output "storage_account_primary_key" {
+  value = module.storage.storage_account_primary_key
+  sensitive = true
+}
