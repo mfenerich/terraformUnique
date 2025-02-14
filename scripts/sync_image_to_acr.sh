@@ -8,7 +8,7 @@ ACR_NAME=$(terraform output -raw acr_name)
 # Set image variables
 IMAGE_TAG="3.1.0"
 GHCR_IMAGE="ghcr.io/huggingface/text-generation-inference:$IMAGE_TAG"
-REPO_NAME="${ACR_NAME}.azurecr.io/text-generation-inference"
+REPO_NAME="text-generation-inference"
 ACR_IMAGE="$REPO_NAME:$IMAGE_TAG"
 
 echo "🔍 Checking if image '$IMAGE_TAG' exists in ACR: $ACR_NAME..."
