@@ -4,14 +4,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.8"
     }
-    # helm = {
-    #   source  = "hashicorp/helm"
-    #   version = "~> 2.12"
-    # }
-    # kubernetes = {
-    #   source  = "hashicorp/kubernetes"
-    #   version = "~> 2.11"
-    # }
   }
 }
 
@@ -109,47 +101,3 @@ module "acr" {
   admin_enabled                 = var.acr_admin_enabled
   aks_kubelet_identity_object_id = module.aks.kubelet_identity_object_id
 }
-
-
-# # 7. Kubernetes Secret for Azure File (using Kubernetes provider)
-# provider "kubernetes" {
-#   host                   = module.aks.kube_config.host
-#     client_certificate     = base64decode(module.aks.kube_config.client_certificate)
-#     client_key             = base64decode(module.aks.kube_config.client_key)
-#     cluster_ca_certificate = base64decode(module.aks.kube_config.cluster_ca_certificate)
-# }
-
-# module "k8s_secret" {
-#   source                     = "./modules/k8s_secret"
-#   namespace                  = "default"
-#   storage_account_name       = module.storage.storage_account_name
-#   storage_account_primary_key = module.storage.storage_account_primary_key
-# }
-
-# # 8. Configure Helm Provider Using AKS Kubeconfig
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.aks.kube_config.host
-#     client_certificate     = base64decode(module.aks.kube_config.client_certificate)
-#     client_key             = base64decode(module.aks.kube_config.client_key)
-#     cluster_ca_certificate = base64decode(module.aks.kube_config.cluster_ca_certificate)
-#   }
-# }
-
-# # 9. Helm Release for the TGI Chart
-# module "helm_release" {
-#   source                = "./modules/helm_release"
-#   release_name          = "tgi"
-#   namespace             = "default"
-#   chart_path            = "./tgi-helm"
-#   chart_version         = "3.1.0"
-#   image_repository      = "ghcr.io/huggingface/text-generation-inference"
-#   image_tag             = "3.1.0"
-#   service_type          = "LoadBalancer"
-#   resources_requests_cpu    = "2"
-#   resources_requests_memory = "4"
-#   resources_limits_cpu      = "4"
-#   resources_limits_memory   = "8Gi"
-#   model_id              = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-#   depends_on            = [module.aks]  # Ensure AKS is created first
-# }
