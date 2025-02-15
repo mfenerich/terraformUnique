@@ -29,3 +29,8 @@ variable "kubernetes_version" {
 variable "log_analytics_workspace_id" {
   type = string
 }
+
+variable "prometheus_dcr_id" {
+  description = "The ID of the Prometheus Data Collection Rule"
+  type        = string
+}

@@ -51,6 +51,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     log_analytics_workspace_id = var.log_analytics_workspace_id
   }
 
+  monitor_metrics {
+    annotations_allowed = null
+    labels_allowed      = null
+  }
+
   azure_policy_enabled = true
 
   tags = merge(var.tags, { environment = var.environment })
@@ -68,4 +73,20 @@ resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   node_labels = {
     "agentpool" = "userpool"
   }
+}
+
+# Enable Azure Monitor Prometheus metrics collection
+resource "azurerm_monitor_data_collection_endpoint" "prometheus" {
+  name                          = "prometheus-dce-${var.environment}"
+  resource_group_name          = var.resource_group_name
+  location                     = var.location
+  kind                        = "Linux"
+}
+
+# Associate the data collection rule with AKS cluster
+resource "azurerm_monitor_data_collection_rule_association" "prometheus" {
+  name                    = "prometheus-dcra-${var.environment}"
+  target_resource_id     = azurerm_kubernetes_cluster.this.id
+  data_collection_rule_id = var.prometheus_dcr_id # Pass DCR ID from log_analytics module
+  description            = "Association between AKS cluster and Prometheus DCR"
 }

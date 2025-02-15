@@ -17,3 +17,13 @@ variable "tags" {
 variable "suffix" {
   type = string
 }
+
+variable "aks_cluster_id" {
+  description = "ID of the AKS Cluster for monitoring"
+  type        = string
+}
+
+variable "aks_identity_principal_id" {
+  description = "Principal ID of AKS cluster identity"
+  type        = string
+}

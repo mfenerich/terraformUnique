@@ -39,3 +39,8 @@ output "storage_account_primary_key" {
   value = module.storage.storage_account_primary_key
   sensitive = true
 }
+
+output "grafana_endpoint" {
+  value       = module.grafana.grafana_endpoint
+  description = "The public endpoint for Azure Managed Grafana"
+}

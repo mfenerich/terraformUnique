@@ -11,13 +11,13 @@ variable "environment" {
 variable "allowed_regions" {
   description = "List of allowed Azure regions"
   type        = list(string)
-  default     = ["East US", "West US", "South India", "Central Europe"]
+  default     = ["East US", "West US", "South India", "Central Europe", "switzerlandnorth"]
 }
 
 variable "location" {
   description = "Primary location"
   type        = string
-  default     = "South India"
+  default     = "switzerlandnorth"
   
   validation {
     condition     = contains(var.allowed_regions, var.location)
