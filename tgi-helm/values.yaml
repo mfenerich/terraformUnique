@@ -2,9 +2,9 @@ release:
   namespace: default
 
 image:
-  repository: devacrh1a756.azurecr.io/text-generation-inference # TODO: need to be dynamic
+  repository: devacr0wsery.azurecr.io/text-generation-inference # TODO: need to be dynamic
   tag: 3.1.0
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 replicas: 1
 
