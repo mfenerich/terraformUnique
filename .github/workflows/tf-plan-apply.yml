@@ -36,10 +36,6 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: terraform
-
       - name: Terraform Plan
         id: tf-plan
         env:
@@ -50,23 +46,26 @@ jobs:
           TF_TAGS: ${{ secrets.TF_TAGS }}
         run: |
           export exitcode=0
+      
+          # Convert JSON-like TF_TAGS secret into Terraform-friendly format
+          TAGS_STRING=$(echo $TF_TAGS | jq -c 'to_entries | map("\(.key)=\(.value)") | join(",")')
+      
           terraform plan -detailed-exitcode -no-color -out tfplan \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
             -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
-            -var='tags=$TF_TAGS' || export exitcode=$?
+            -var="tags={$TAGS_STRING}" || export exitcode=$?
       
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           
           if [ $exitcode -eq 1 ]; then
-            echo Terraform Plan Failed!
+            echo "Terraform Plan Failed!"
             exit 1
           else 
             exit 0
           fi
         working-directory: terraform
-      
 
       - name: Publish Terraform Plan
         uses: actions/upload-artifact@v4
@@ -145,11 +144,15 @@ jobs:
           TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
           TF_TAGS: ${{ secrets.TF_TAGS }}
         run: |
+          # Convert JSON-like TF_TAGS secret into Terraform-friendly format
+          TAGS_STRING=$(echo $TF_TAGS | jq -c 'to_entries | map("\(.key)=\(.value)") | join(",")')
+      
           terraform apply -auto-approve \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
             -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
-            -var='tags=$TF_TAGS' tfplan
+            -var="tags={$TAGS_STRING}" tfplan
         working-directory: terraform
+        
         
