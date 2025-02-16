@@ -67,28 +67,32 @@ resource "azurerm_monitor_data_collection_rule" "container_logs" {
   name                = "container-logs-dcr-${var.environment}"
   resource_group_name = var.resource_group_name
   location           = var.location
+  kind              = "Linux"
 
   data_sources {
     extension {
-      name           = "ContainerLogV2"
-      extension_name = "ContainerLogV2"
-      streams        = ["Microsoft-ContainerLogV2"]
-      input_data_sources = [
-        "containerLogV2"
-      ]
+      name            = "ContainerLogV2"
+      extension_name  = "ContainerLogV2"
+      streams         = ["Microsoft-ContainerLogV2"]
+      extension_json = jsonencode({
+        containers = {
+          streams = ["stdout", "stderr"]
+          namespaces = []
+        }
+      })
     }
   }
 
   destinations {
     log_analytics {
       workspace_resource_id = azurerm_log_analytics_workspace.this.id
-      name                 = "container-logs-destination"
+      name                 = "destination-log"
     }
   }
 
   data_flow {
     streams      = ["Microsoft-ContainerLogV2"]
-    destinations = ["container-logs-destination"]
+    destinations = ["destination-log"]
   }
 }
 
