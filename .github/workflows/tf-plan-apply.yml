@@ -51,15 +51,15 @@ jobs:
         run: |
           export exitcode=0
       
-          # Convert JSON-like TF_TAGS secret into Terraform-friendly format
-          TAGS_STRING=$(echo $TF_TAGS | jq -c 'to_entries | map("\(.key)=\(.value)") | join(",")')
+          # Convert JSON-style TF_TAGS into valid Terraform map format
+          TAGS_STRING=$(echo "$TF_TAGS" | jq -c 'to_entries | map("\"\(.key)\" = \"\(.value)\"") | join(", ")')
       
           terraform plan -detailed-exitcode -no-color -out tfplan \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
             -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
-            -var="tags={$TAGS_STRING}" || export exitcode=$?
+            -var="tags={${TAGS_STRING}}" || export exitcode=$?
       
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           
@@ -70,6 +70,7 @@ jobs:
             exit 0
           fi
         working-directory: terraform
+      
 
       - name: Publish Terraform Plan
         uses: actions/upload-artifact@v4
@@ -148,13 +149,13 @@ jobs:
           TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
           TF_TAGS: ${{ secrets.TF_TAGS }}
         run: |
-          # Convert JSON-like TF_TAGS secret into Terraform-friendly format
-          TAGS_STRING=$(echo $TF_TAGS | jq -c 'to_entries | map("\(.key)=\(.value)") | join(",")')
+          # Convert JSON-style TF_TAGS into valid Terraform map format
+          TAGS_STRING=$(echo "$TF_TAGS" | jq -c 'to_entries | map("\"\(.key)\" = \"\(.value)\"") | join(", ")')
       
           terraform apply -auto-approve \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
             -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
-            -var="tags={$TAGS_STRING}" tfplan
+            -var="tags={${TAGS_STRING}}" tfplan
         working-directory: terraform
