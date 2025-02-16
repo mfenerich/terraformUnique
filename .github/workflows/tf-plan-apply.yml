@@ -154,5 +154,3 @@ jobs:
             -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
             -var="tags={$TAGS_STRING}" tfplan
         working-directory: terraform
-        
-        
