@@ -52,18 +52,18 @@ module "vnet" {
 }
 
 # 3. Cosmos DB Account & Private Endpoint/DNS
-module "cosmosdb" {
-  source                = "./modules/cosmosdb"
-  environment           = var.environment
-  resource_group_name   = module.resource_group.name
-  location              = module.resource_group.location
-  tags                  = var.tags
-  suffix                = random_string.suffix.result
-  virtual_network_id    = module.vnet.virtual_network_id
-  cosmosdb_subnet_id    = module.vnet.cosmosdb_subnet_id
-  mongo_server_version  = var.mongo_server_version
-  secondary_location    = var.secondary_location
-}
+# module "cosmosdb" {
+#   source                = "./modules/cosmosdb"
+#   environment           = var.environment
+#   resource_group_name   = module.resource_group.name
+#   location              = module.resource_group.location
+#   tags                  = var.tags
+#   suffix                = random_string.suffix.result
+#   virtual_network_id    = module.vnet.virtual_network_id
+#   cosmosdb_subnet_id    = module.vnet.cosmosdb_subnet_id
+#   mongo_server_version  = var.mongo_server_version
+#   secondary_location    = var.secondary_location
+# }
 
 # 4. Log Analytics Workspace & Solution
 module "log_analytics" {
