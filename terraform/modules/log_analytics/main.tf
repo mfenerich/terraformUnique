@@ -60,3 +60,42 @@ resource "azurerm_role_assignment" "aks_prometheus" {
   role_definition_name = "Monitoring Metrics Publisher"
   principal_id         = var.aks_identity_principal_id
 }
+
+# Enable Azure Monitor for Containers (Kubernetes Insights)
+# Data Collection Rule for container logs
+resource "azurerm_monitor_data_collection_rule" "container_logs" {
+  name                = "container-logs-dcr-${var.environment}"
+  resource_group_name = var.resource_group_name
+  location           = var.location
+
+  data_sources {
+    extension {
+      name           = "ContainerLogV2"
+      extension_name = "ContainerLogV2"
+      streams        = ["Microsoft-ContainerLogV2"]
+      input_data_sources = [
+        "containerLogV2"
+      ]
+    }
+  }
+
+  destinations {
+    log_analytics {
+      workspace_resource_id = azurerm_log_analytics_workspace.this.id
+      name                 = "container-logs-destination"
+    }
+  }
+
+  data_flow {
+    streams      = ["Microsoft-ContainerLogV2"]
+    destinations = ["container-logs-destination"]
+  }
+}
+
+# Associate the container logs DCR with the AKS cluster
+resource "azurerm_monitor_data_collection_rule_association" "container_logs" {
+  name                    = "container-logs-dcra-${var.environment}"
+  target_resource_id     = var.aks_cluster_id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.container_logs.id
+  description            = "Association for container logs collection"
+}
