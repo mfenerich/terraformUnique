@@ -47,7 +47,7 @@ jobs:
           TF_SUBSCRIPTION_ID: ${{ secrets.TF_SUBSCRIPTION_ID }}
           TF_LOCATION: ${{ secrets.TF_LOCATION }}
           TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
-          TF_TAGS: ${{ secrets.TF_TAGS }}
+          TF_TAGS: ${{ secrets.TF_VAR_TAGS }}
         run: |
           export exitcode=0
       
@@ -55,7 +55,8 @@ jobs:
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
-            -var="kubernetes_version=$TF_KUBERNETES_VERSION" || export exitcode=$?
+            -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
+            -var="tags={${TAGS_STRING}}" || export exitcode=$?
       
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           
@@ -143,12 +144,13 @@ jobs:
           TF_SUBSCRIPTION_ID: ${{ secrets.TF_SUBSCRIPTION_ID }}
           TF_LOCATION: ${{ secrets.TF_LOCATION }}
           TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
-          TF_TAGS: ${{ secrets.TF_TAGS }}
+          TF_TAGS: ${{ secrets.TF_VAR_TAGS }}
         run: |
           
           terraform apply -auto-approve \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
             -var="location=$TF_LOCATION" \
-            -var="kubernetes_version=$TF_KUBERNETES_VERSION" tfplan
+            -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
+            -var="tags={${TAGS_STRING}}" tfplan
         working-directory: terraform
