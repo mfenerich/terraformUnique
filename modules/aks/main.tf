@@ -64,10 +64,10 @@ resource "azurerm_kubernetes_cluster" "this" {
 resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
-  vm_size               = "Standard_D3_v2"
+  vm_size               = "Standard_A8m_v2"
   os_disk_size_gb       = 128
   auto_scaling_enabled  = true
-  min_count             = var.environment == "prod" ? 5 : 1
+  min_count             = var.environment == "prod" ? 1 : 1
   max_count             = var.environment == "prod" ? 5 : 1
   vnet_subnet_id        = var.aks_subnet_id
   node_labels = {

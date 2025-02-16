@@ -25,14 +25,18 @@ spec:
         - name: tgi
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - "--model-id"
-            - "{{ .Values.model.id }}"
           env:
             - name: MODEL_ID
               value: "{{ .Values.model.id }}"
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-secret
+                  key: HF_TOKEN
+            - name: APPLICATION_SERVER_PORT
+              value: "8000"
           ports:
-            - containerPort: 80
+            - containerPort: 8000
               name: http
               protocol: TCP
           volumeMounts:

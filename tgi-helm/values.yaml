@@ -2,33 +2,33 @@ release:
   namespace: default
 
 image:
-  repository: devacr0wsery.azurecr.io/text-generation-inference # TODO: need to be dynamic
-  tag: 3.1.0
-  pullPolicy: IfNotPresent
+  repository: devacr36jb10.azurecr.io/microsoft-dialogpt-small  # Updated to your new image
+  tag: latest  # Use the latest tag or a specific version
+  pullPolicy: Always
 
 replicas: 1
 
 service:
   type: LoadBalancer
   port: 80
+  targetPort: 8000
 
 resources:
   requests:
-    cpu: "2"
-    memory: "10Gi"
-  limits:
     cpu: "4"
-    memory: "14Gi"
+    memory: "32Gi"
+  limits:
+    cpu: "8"
+    memory: "64Gi"
 
 model:
-  id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  id: "microsoft-dialogpt-small"
 
 persistence:
   enabled: true
-  size: 20Gi
+  size: 300Gi
   storageClass: azurefile-csi
   mountPath: "/data"
-
 
 storageAccountName: ""
 storageAccountKey: ""
