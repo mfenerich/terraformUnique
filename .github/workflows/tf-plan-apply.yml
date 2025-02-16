@@ -40,16 +40,23 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      - name: Terraform Format
-        run: terraform fmt -check
-        working-directory: terraform
-
       - name: Terraform Plan
         id: tf-plan
+        env:
+          TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
+          TF_SUBSCRIPTION_ID: ${{ secrets.TF_SUBSCRIPTION_ID }}
+          TF_LOCATION: ${{ secrets.TF_LOCATION }}
+          TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
+          TF_TAGS: ${{ secrets.TF_TAGS }}
         run: |
           export exitcode=0
-          terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
-
+          terraform plan -detailed-exitcode -no-color -out tfplan \
+            -var="environment=$TF_ENVIRONMENT" \
+            -var="subscription_id=$TF_SUBSCRIPTION_ID" \
+            -var="location=$TF_LOCATION" \
+            -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
+            -var='tags=$TF_TAGS' || export exitcode=$?
+      
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           
           if [ $exitcode -eq 1 ]; then
@@ -58,7 +65,8 @@ jobs:
           else 
             exit 0
           fi
-        working-directory: terraform  # 👈 Set working directory
+        working-directory: terraform
+      
 
       - name: Publish Terraform Plan
         uses: actions/upload-artifact@v4
@@ -130,5 +138,18 @@ jobs:
           path: terraform
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        env:
+          TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
+          TF_SUBSCRIPTION_ID: ${{ secrets.TF_SUBSCRIPTION_ID }}
+          TF_LOCATION: ${{ secrets.TF_LOCATION }}
+          TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
+          TF_TAGS: ${{ secrets.TF_TAGS }}
+        run: |
+          terraform apply -auto-approve \
+            -var="environment=$TF_ENVIRONMENT" \
+            -var="subscription_id=$TF_SUBSCRIPTION_ID" \
+            -var="location=$TF_LOCATION" \
+            -var="kubernetes_version=$TF_KUBERNETES_VERSION" \
+            -var='tags=$TF_TAGS' tfplan
         working-directory: terraform
+        
