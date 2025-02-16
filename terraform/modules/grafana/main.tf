@@ -20,18 +20,12 @@ resource "azurerm_dashboard_grafana" "this" {
 }
 
 # Since the access to Azure Managed Grafana is public, we need to assign the "Grafana Admin" role to the current user
-resource "null_resource" "grafana_role_assignment" {
-  depends_on = [azurerm_dashboard_grafana.this]
-
-  provisioner "local-exec" {
-    command = <<EOT
-      az role assignment create \
-        --assignee $(az ad signed-in-user show --query id -o tsv) \
-        --role "Grafana Admin" \
-        --scope ${azurerm_dashboard_grafana.this.id}
-    EOT
-  }
+resource "azurerm_role_assignment" "grafana_admin" {
+  scope                = azurerm_dashboard_grafana.this.id
+  role_definition_name = "Grafana Admin"
+  principal_id         = azurerm_dashboard_grafana.this.identity[0].principal_id
 }
+
 
 resource "azurerm_role_assignment" "grafana_subscription_reader" {
   scope                = "/subscriptions/${var.subscription_id}"
