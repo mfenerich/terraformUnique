@@ -52,7 +52,7 @@ jobs:
           export exitcode=0
       
           # Convert JSON-style TF_TAGS into valid Terraform map format
-          TAGS_STRING=$(echo "$TF_TAGS" | jq -c 'to_entries | map("\"\(.key)\" = \"\(.value)\"") | join(", ")')
+          TAGS_STRING=$(echo "$TF_TAGS" | jq -r 'to_entries | map("\(.key)=\\\"\(.value)\\\"") | join(", ")')
       
           terraform plan -detailed-exitcode -no-color -out tfplan \
             -var="environment=$TF_ENVIRONMENT" \
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: terraform/tfplan  # 👈 Store tfplan in correct location
+          path: terraform/tfplan
 
       - name: Create String Output
         id: tf-plan-string
@@ -149,9 +149,9 @@ jobs:
           TF_KUBERNETES_VERSION: ${{ secrets.TF_KUBERNETES_VERSION }}
           TF_TAGS: ${{ secrets.TF_TAGS }}
         run: |
-          # Convert JSON-style TF_TAGS into valid Terraform map format
-          TAGS_STRING=$(echo "$TF_TAGS" | jq -c 'to_entries | map("\"\(.key)\" = \"\(.value)\"") | join(", ")')
-      
+          # Convert JSON-style TF_TAGS into properly escaped Terraform map format
+          TAGS_STRING=$(echo "$TF_TAGS" | jq -r 'to_entries | map("\(.key)=\\\"\(.value)\\\"") | join(", ")')
+          
           terraform apply -auto-approve \
             -var="environment=$TF_ENVIRONMENT" \
             -var="subscription_id=$TF_SUBSCRIPTION_ID" \
