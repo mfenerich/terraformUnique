@@ -23,7 +23,8 @@ resource "azurerm_dashboard_grafana" "this" {
 resource "azurerm_role_assignment" "grafana_admin" {
   scope                = azurerm_dashboard_grafana.this.id
   role_definition_name = "Grafana Admin"
-  principal_id         = azurerm_dashboard_grafana.this.identity[0].principal_id
+  # principal_id         = azurerm_dashboard_grafana.this.identity[0].principal_id
+  principal_id         = "f1640552-081b-47d6-bd1d-b4ffa43b4c9e" # For desmonstrations purpose
 }
 
 
