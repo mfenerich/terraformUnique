@@ -5,11 +5,20 @@ terraform {
       version = "~> 4.19"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name   = "rg-terraform-github-actions-state"  # Existing resource group
+    storage_account_name  = "storagemarcelf"                    # Existing storage account
+    container_name        = "tfstate"                           # Blob container (must exist)
+    key                   = "terraform-big-main.tfstate"        # Unique state file name
+    use_oidc              = true
+  }
 }
 
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
+  use_oidc = true
 }
 
 # Generate a unique suffix for naming
