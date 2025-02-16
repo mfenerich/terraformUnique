@@ -36,6 +36,10 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform 
+
       - name: Terraform Plan
         id: tf-plan
         env:
