@@ -4,6 +4,6 @@ resource "azurerm_resource_group" "this" {
   tags     = merge(var.tags, { environment = var.environment })
 
   lifecycle {
-    prevent_destroy = var.environment == "prod" ? true : false
+    prevent_destroy = false
   }
 }
