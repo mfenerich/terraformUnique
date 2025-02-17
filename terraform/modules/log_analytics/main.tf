@@ -72,16 +72,14 @@ resource "azurerm_monitor_data_collection_rule" "container_logs" {
   data_sources {
     extension {
       name            = "ContainerLogDataSource"
-      extension_name  = "ContainerInsights"  # Correct extension name
+      extension_name  = "ContainerInsights"
       streams         = ["Microsoft-ContainerLogV2"]
       extension_json  = jsonencode({
         dataSources = {
           containerLogs = [
             {
-              namespace = "*"  # Collect logs from all namespaces
+              namespace = "*"
               streams   = ["stdout", "stderr"]
-              # Optional: Add a label if needed
-              # label    = "all-logs"
             }
           ]
         }
