@@ -28,11 +28,11 @@ spec:
           env:
             - name: MODEL_ID
               value: "{{ .Values.model.id }}"
-            - name: HF_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: huggingface-secret
-                  key: HF_TOKEN
+            # - name: HF_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: huggingface-secret
+            #       key: HF_TOKEN
             - name: APPLICATION_SERVER_PORT
               value: "8000"
           ports:
