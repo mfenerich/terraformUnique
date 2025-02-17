@@ -66,18 +66,24 @@ resource "azurerm_role_assignment" "aks_prometheus" {
 resource "azurerm_monitor_data_collection_rule" "container_logs" {
   name                = "container-logs-dcr-${var.environment}"
   resource_group_name = var.resource_group_name
-  location           = var.location
-  kind              = "Linux"
+  location            = var.location
+  kind                = "Linux"
 
   data_sources {
     extension {
-      name            = "ContainerLogV2"
-      extension_name  = "ContainerLogV2"
+      name            = "ContainerLogDataSource"
+      extension_name  = "ContainerInsights"  # Correct extension name
       streams         = ["Microsoft-ContainerLogV2"]
-      extension_json = jsonencode({
-        containers = {
-          streams = ["stdout", "stderr"]
-          namespaces = []
+      extension_json  = jsonencode({
+        dataSources = {
+          containerLogs = [
+            {
+              namespace = "*"  # Collect logs from all namespaces
+              streams   = ["stdout", "stderr"]
+              # Optional: Add a label if needed
+              # label    = "all-logs"
+            }
+          ]
         }
       })
     }
@@ -86,7 +92,7 @@ resource "azurerm_monitor_data_collection_rule" "container_logs" {
   destinations {
     log_analytics {
       workspace_resource_id = azurerm_log_analytics_workspace.this.id
-      name                 = "destination-log"
+      name                  = "destination-log"
     }
   }
 
