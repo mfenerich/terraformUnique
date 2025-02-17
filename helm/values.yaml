@@ -1,0 +1,34 @@
+release:
+  namespace: default
+
+image:
+  repository: devacr830ofj.azurecr.io/microsoft-dialogpt-small
+  tag: latest
+  pullPolicy: Always
+
+replicas: 1
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: "4"
+    memory: "32Gi"
+  limits:
+    cpu: "8"
+    memory: "64Gi"
+
+model:
+  id: "microsoft-dialogpt-small"
+
+persistence:
+  enabled: true
+  size: 300Gi
+  storageClass: azurefile-csi
+  mountPath: "/data"
+
+storageAccountName: ""
+storageAccountKey: ""
