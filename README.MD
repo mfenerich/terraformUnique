@@ -183,6 +183,51 @@ terraform apply -auto-approve
 make all
 ```
 
+## **Step 3: Verify Functionality**
+After ensuring the service is running, follow these steps to verify that the API is functional.
+
+### **1. Get the External IP**
+Run the following command to get the external IP of the `tgi-service` service:
+```bash
+kubectl get svc
+```
+Look for the **EXTERNAL-IP** under the `tgi-service` service.
+
+### **2. Open API Documentation**
+Once you have the external IP, open your browser and navigate to:
+```
+http://<EXTERNAL-IP>/docs
+```
+This will open the **FastAPI Swagger UI**, allowing you to test the API.
+
+### **3. Check Service Health**
+Run the following command to check if the service is healthy:
+```bash
+curl http://<EXTERNAL-IP>/health
+```
+Expected Response:
+```json
+{"status": "healthy"}
+```
+
+### **4. Test Chatbot API**
+To verify that the chatbot is working, send a test request:
+```bash
+curl -X 'POST' \
+  'http://<EXTERNAL-IP>/chat' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "inputs": "Hello, who are you?"
+}'
+```
+Expected Response:
+```json
+{
+  "response": "So they don't have to pay a thing then?"
+}
+```
+
 ---
 
 ## **Conclusion**
